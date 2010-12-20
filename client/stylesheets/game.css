@@ -1,0 +1,142 @@
+.bots {
+    font-family: Arial;
+    font-size: 15px;
+    color: #000000;
+}
+
+.bots .dialog {
+    -webkit-box-shadow: rgba(0, 0, 0, 0.699219) 5px 5px 10px;
+    border: 7px solid rgba(0,0,0,0.7);
+    -webkit-border-radius: 10px;
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+}
+
+.bots .dialog.loginDialog {
+    width: 350px;
+    height: 30px;
+}
+
+.bots .dialog.loginDialog .loginLabel {
+    text-align: center;
+    -webkit-border-radius: 4px 0px 0px 4px;
+    background-color: rgba(250,250,250,0.5);
+    width: 60px;
+    height: 25px;
+    display: inline-block;
+    margin: 0px;
+    padding: 5px 0px 0px;
+    float: left;
+}
+
+.bots .dialog.loginDialog .loginInput {
+    border: none;
+    background-color: rgba(0,0,0,0.5);
+    font-weight: bold;
+    padding: 5px;
+    color: green;
+    border-left: 3px solid rgba(0,0,0,0.5);
+    border-right: 3px solid rgba(0,0,0,0.5);
+    width: 230px;
+    height: 30px;
+    display: inline-block;
+    margin: 0px;
+}
+
+.bots .dialog.loginDialog .loginBtn {
+    background-color: rgba(250,250,250,0.2);
+    font-weight: bold;
+    border: none;
+    -webkit-border-radius: 0px 4px 4px 0px;
+    width: 60px;
+    height: 30px;
+    display: inline-block;
+    margin: 0px;
+    padding: 0px;
+}
+
+.bots .dialog.statsDialog {
+    width: 500px;
+}
+
+.bots .dialog.statsDialog .statsRowDivider {
+    display: block;
+    background-color: rgba(0,0,0,0.7);
+    height: 7px;
+}
+
+.bots .dialog.statsDialog .statsRow {
+    display: block;
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.bots .dialog.statsDialog .statsRow .statName {
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    background-color: rgba(250,250,250,0.5);
+    text-align: right;
+    width: 140px;
+    height: 21px;
+    display: inline-block;
+    padding: 9px 10px 0px 0px;
+    float: left;
+}
+
+.bots .dialog.statsDialog .statsRow .statValue {
+    background-color: rgba(0,0,0,0.6);
+    text-align: left;
+    width: 340px;
+    height: 25px;
+    color: green;
+    display: inline-block;
+    padding: 5px 0px 0px 10px;
+}
+
+.bots .dialog.statsDialog .statsRowDivider {
+    display: block;
+    background-color: rgba(0,0,0,0.7);
+    height: 7px;
+}
+
+.bots .dialog.readyPlayersDialog {
+    width: 500px;
+    top: 10px !important;
+    background-color: rgba(250,250,250,0.2);
+    -webkit-box-shadow: rgba(250,250,250, 0.4) 0px 0px 20px;
+}
+
+.bots .dialog.readyPlayersDialog .statusRow {
+    display: block;
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.bots .dialog.readyPlayersDialog .statusRow .playerName {
+    font-size: 11px;
+    font-weight: bold;
+    background-color: rgba(250,250,250,0.2);
+    text-align: right;
+    width: 200px;
+    height: 21px;
+    display: inline-block;
+    padding: 9px 10px 0px 0px;
+    float: left;
+}
+
+.bots .dialog.readyPlayersDialog .statusRow .playerStatus {
+    background-color: rgba(0,0,0,0.5);
+    text-align: left;
+    width: 280px;
+    height: 25px;
+    display: inline-block;
+    padding: 5px 0px 0px 10px;
+}
+.bots .dialog.readyPlayersDialog .statusRow .playerStatus.Ready {
+    color: green;
+}
+.bots .dialog.readyPlayersDialog .statusRow .playerStatus.NotReady {
+    color: red;
+}

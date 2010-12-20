@@ -1,0 +1,13 @@
+<html>
+  <head>
+    <link rel="stylesheet" type="text/css" href="stylesheets/game.css" />
+    <script type="text/javascript" src="botclient.js"></script>
+    <script type="text/javascript">
+      botclient.onState(function(stateInfo) {
+          return botclient.getRandomBehaviour();
+      });
+    </script>
+  </head>
+  <body class="bots" id="myScr" onLoad="botclient.renderTo('myScr')">
+  </body>
+</html>

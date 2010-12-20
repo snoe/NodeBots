@@ -1,0 +1,12 @@
+.bots .loginPrompt .inputBox {
+    position: absolute;
+    border: none;
+    background-color: rgba(250,250,250,0);
+    font-family: Arial;
+    font-weight: bold;
+    font-size: 15px;
+    padding: 5px;
+    color: green;
+}
+
+background-color:rgba(250,250,250,0.3);  border:none;font-family:Arial; font-weight:bold; font-size:15px; 
