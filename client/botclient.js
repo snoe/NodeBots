@@ -1,16 +1,8 @@
 botclient = function() {
-    var ws = new WebSocket("ws://curvedev:8000");
     var scr = document.createElement('canvas');
     var gameClt = null;
     var curPlayerId = null;
-
-    var getPossibleActions = function() {
-        return ['move', 'shoot'];
-    };
-
-    var getPossibleDirections = function() {
-        return ['west', 'east', 'north', 'south'];
-    };
+    var ws = null;
 
     var onState = function(stateInfo) {};
 
@@ -25,41 +17,39 @@ botclient = function() {
         document.head.appendChild(jsIncl);
     };
 
-    ws.onmessage = function(evt) {
-        var data = JSON.parse(evt.data);
-        switch (data.command) {
-        case "id":
-            curPlayerId = data.value;
-            gameClt.setCurrentPlayerId(curPlayerId);
-            break;
-        case "state":
-            gameClt.update(data.value);
-            ws.send(JSON.stringify(onState(data.value)));
-            break;
-        case "gameover":
-            gameClt.onGameOver();
-            break;
-        case "connected":
-            gameClt.onUserConnected(data.value);
-            break;
-        case "ready":
-            gameClt.onUserReady(data.value); // { command: "ready", id: ID, username: USERNAME }
-            break;
-        }
-    };
 
     var renderTo = function(containerId) {
         var container = document.getElementById(containerId);
         container.style.margin="0px";
         container.style.padding="0px;";
-        scr.setAttribute("width", container.clientWidth);
+        scr.setAttribute("width", container.clientWidth - 300);
         scr.setAttribute("height", container.clientHeight);
         gameClt = client(scr);
         container.appendChild(scr);
     };
 
     var ready = function() {
-        ws.send(JSON.stringify({ command: "ready", username: gameClt.getUsername() }));
+        ws = new WebSocket("ws://" + gameClt.getServerName());
+        ws.onopen = function(evt) {
+            console.log('Connected');
+        }
+
+        ws.onmessage = function(evt) {
+            var data = JSON.parse(evt.data);
+            switch (data.command) {
+            case "id":
+                console.log('received:', data.command);
+                curPlayerId = data.value;
+                gameClt.setCurrentPlayerId(curPlayerId);
+                ws.send(JSON.stringify({ command: "ready", username: gameClt.getUsername() }));
+                break;
+            case "state":
+                gameClt.update(data.value);
+                var action = onState(data.value);
+                ws.send(JSON.stringify({command: 'action', value: action}));
+                break;
+            }
+        };
     };
 
     var randomize = function(arr) {
@@ -74,21 +64,12 @@ botclient = function() {
         return arr[0];
     };
 
-    var getRandomBehaviour = function() {
-        return {
-            action: randomize(getPossibleActions()),
-            value: randomize(getPossibleDirections())
-        };
-    };
-
     init();
 
     return {
         renderTo: renderTo,
         ready: ready,
         onState: setOnState,
-        getRandomBehaviour: getRandomBehaviour,
-        getPossibleActions: getPossibleActions,
-        getPossibleDirections: getPossibleDirections
+        randomize: randomize,
     };
 }();

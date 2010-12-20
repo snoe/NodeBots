@@ -13,11 +13,9 @@ client = function(scr) {
     var LoginDialog = null;
     var loginInput = null;
     var StatsDialog = null;
-    var ReadyPlayersDialog = null;
 
     var gameStats = null;
     var curPlayerId = null;
-    var players = {};
 
     var init = function() {
         ctx = scr.getContext("2d");
@@ -45,7 +43,6 @@ client = function(scr) {
             }
         } else {
             hideDialog("LoginDialog");
-            hideDialog("ReadyPlayersDialog");
             ctx.drawImage(background, 0, 0, scr.width, scr.height);
             refreshScreen(state);
         }
@@ -96,6 +93,21 @@ client = function(scr) {
             cssClass: "loginDialog",
             id: "LoginDialog"
         });
+
+        // Create label
+        var serverLabel = document.createElement("div");
+        serverLabel.setAttribute("class", "loginLabel");
+        serverLabel.innerHTML = "server:port :";
+        LoginDialog.appendChild(serverLabel);
+
+        loginServer = document.createElement('input');
+        loginServer.setAttribute("id", "loginServer");
+        loginServer.setAttribute("value", "curvedev:8000");
+        loginServer.setAttribute("type", "text");
+        loginServer.setAttribute("class", "loginInput");
+        LoginDialog.appendChild(loginServer);
+
+        LoginDialog.appendChild(document.createElement('br'));
         // Create label
         var label = document.createElement("div");
         label.setAttribute("class", "loginLabel");
@@ -106,7 +118,6 @@ client = function(scr) {
         loginInput.setAttribute("id", "loginName");
         loginInput.setAttribute("type", "text");
         loginInput.setAttribute("class", "loginInput");
-        loginInput.setAttribute("onkeypress", "if(arguments[0].keyCode===13 && value!==''){botclient.ready();}");
         LoginDialog.appendChild(loginInput);
         // Create login button
         var loginBtn = document.createElement("button");
@@ -123,72 +134,47 @@ client = function(scr) {
             id: "StatsDialog"
         });
 
-        var createStatsRow = function(data) {
+        var createStatsRow = function(data, isSelf) {
             var newRow = document.createElement("div");
-            newRow.setAttribute("class", "statsRow");
+            var class = 'statsRow';
+            if (isSelf) {
+                var class = class + ' isSelf';
+            }
+            newRow.setAttribute("class", class);
             newRow.innerHTML = '<div class="statName">'+data.name+'</div><div class="statValue">'+data.value+'</div>';
             return newRow;
         };
 
         var renderDivider = false;
-        for (var i in players) {
+        for (var i in gameStats.players) {
             var aPlayer = gameStats.players[i];
             if (renderDivider) {
                 var divider = document.createElement("div");
                 divider.setAttribute("class", "statsRowDivider");
                 StatsDialog.appendChild(divider);
             }
+            var isSelf = aPlayer.id === curPlayerId;
             StatsDialog.appendChild(createStatsRow({
                 name: "PLAYER:",
-                value: players[i].username
-            }));
+                value: gameStats.players[i].username
+            }, isSelf));
             StatsDialog.appendChild(createStatsRow({
                 name: "STATUS:",
                 value: aPlayer.alive ? "ALIVE" : "DEAD"
-            }));
+            }, isSelf));
             StatsDialog.appendChild(createStatsRow({
                 name: "KILLS:",
                 value: aPlayer.kills
-            }));
+            }, isSelf));
             StatsDialog.appendChild(createStatsRow({
                 name: "SHOTS:",
                 value: aPlayer.shots
-            }));
+            }, isSelf));
             StatsDialog.appendChild(createStatsRow({
                 name: "ACCURACY:",
                 value: (aPlayer.kills ? Math.floor((100/(aPlayer.shots/aPlayer.kills))) : 0) + '%'
-            }));
+            }, isSelf));
             renderDivider = true;
-        }
-    };
-
-    var createReadyPlayersDialog = function() {
-        ReadyPlayersDialog = createDialog({
-            cssClass: "readyPlayersDialog",
-            id: "ReadyPlayersDialog"
-        });
-
-        var createStatusRow = function(player) {
-            var newRow = document.createElement("div");
-            newRow.setAttribute("class", "statusRow");
-            newRow.innerHTML = '<div class="playerName">'+player.name+'</div><div class="'+cssClass+'">'+player.status+'</div>';
-            return newRow;
-        };
-
-        for (var i in players) {
-            var username = "PLAYER [" + players[i].id + "]";
-            var status = "WAITING ...";
-            var cssClass = "playerStatus NotReady";
-            if (players[i].username) {
-                username = players[i].username;
-                status = "READY";
-                cssClass = "playerStatus Ready";
-            }
-            ReadyPlayersDialog.appendChild(createStatusRow({
-                name: username,
-                status: status,
-                cssClass: cssClass
-            }));
         }
     };
 
@@ -199,18 +185,20 @@ client = function(scr) {
     };
 
     var drawPlayer = function(player) {
-        var xCoord = player.x*cellWidth;
-        var yCoord = player.y*cellHeight;
-        ctx.strokeStyle = "rgba(250,0,0,0.3)";
-        if (player.id===curPlayerId) {
-            for (var i=radius; i>0; i--) {
-                ctx.beginPath();
-                ctx.arc(xCoord, yCoord, i, 0, Math.PI*2, false);
-                i===radius ? ctx.stroke() : ctx.fill();
-                ctx.fillStyle = "rgba(250,250,250,"+1/radius+")";
+        if (player.alive) {
+            var xCoord = player.x*cellWidth;
+            var yCoord = player.y*cellHeight;
+            ctx.strokeStyle = "rgba(250,0,0,0.3)";
+            if (player.id===curPlayerId) {
+                for (var i=radius; i>0; i--) {
+                    ctx.beginPath();
+                    ctx.arc(xCoord, yCoord, i, 0, Math.PI*2, false);
+                    i===radius ? ctx.stroke() : ctx.fill();
+                    ctx.fillStyle = "rgba(250,250,250,"+1/radius+")";
+                }
             }
+            ctx.drawImage(player.image, xCoord-cellWidth, yCoord-cellHeight, cellWidth*2, cellHeight*2);
         }
-        ctx.drawImage(player.image, xCoord-cellWidth, yCoord-cellHeight, cellWidth*2, cellHeight*2);
     };
 
     var assignWeapon = function(player) {
@@ -280,32 +268,13 @@ client = function(scr) {
                 drawBullet(player, player.bullets[j]);
             }
         };
-    };
-
-    var onUserConnected = function(newUserId) {
-        if (!newUserId) {
-            return;
-        }
-        players[newUserId] = {
-            id: newUserId,
-            username: null
-        };
-        destroyDialog("ReadyPlayersDialog");
-        showDialog("ReadyPlayersDialog");
-    };
-
-    var onUserReady = function(state) {
-        if (state.id) {
-            players[state.id] = state;
-        }
-        destroyDialog("ReadyPlayersDialog");
-        showDialog("ReadyPlayersDialog");
-    };
-
-    var onGameOver = function() {
+        destroyDialog("StatsDialog");
         showDialog("StatsDialog");
-    };
 
+    };
+    var getServerName = function() {
+        return loginServer.value;
+    };
     var getUsername = function() {
         return loginInput.value;
     };
@@ -318,10 +287,8 @@ client = function(scr) {
 
     return {
         update: update,
+        getServerName: getServerName,
         getUsername: getUsername,
         setCurrentPlayerId: setCurrentPlayerId,
-        onUserConnected: onUserConnected,
-        onUserReady: onUserReady,
-        onGameOver: onGameOver
     };
 };

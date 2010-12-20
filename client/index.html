@@ -4,7 +4,13 @@
     <script type="text/javascript" src="botclient.js"></script>
     <script type="text/javascript">
       botclient.onState(function(stateInfo) {
-          return botclient.getRandomBehaviour();
+          var actions = ['move', 'shoot'];
+          var directions = ['west', 'east', 'north', 'south'];
+
+          return {
+              action: botclient.randomize(actions),
+              value: botclient.randomize(directions)
+          };
       });
     </script>
   </head>

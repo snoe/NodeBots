@@ -1,28 +1,31 @@
 var Game = function() {
-    this.connections = [];
     this.responses = {};
-    this.gameStarted = false;
-    this.gameOver = false;
-    this.turns = 0;
-    this.state = {};
     this.game = {};
     this.colors = ['green', 'red', 'orange', 'blue', 'yellow', 'black'];
+    this.state = this.buildState();
+    this.turns = 0;
 }
 
 Game.prototype.buildState = function() {
     var newState = {players: {}};
-    this.connections.forEach(function(conn){
-        this.addPlayer(conn);
-    },this);
     return newState;
 }
 
 Game.prototype.addPlayer = function(conn) {
     var x = Math.floor(Math.random() * 100);
     var y = Math.floor(Math.random() * 100);
-    var color = this.colors.pop()
-    this.state.players[conn.id] = {id: conn.id, x: x, y: y, alive: true, kills: 0, shots: 0, color: color, bullets: []}
+    if (this.colors.length) {
+        var color = this.colors.pop()
+    } else {
+        this.colors = ['green', 'red', 'orange', 'blue', 'yellow', 'black'];
+        var color = this.colors.pop();
+    }
+    this.state.players[conn.id] = {id: conn.id, x: x, y: y, alive: true, kills: 0, shots: 0, color: color, dob: this.turns, bullets: []}
     this.game[x+','+y] = conn.id;
+}
+
+Game.prototype.removePlayer = function(conn) {
+    this.state.players[conn.id].alive = false;
 }
 
 Game.prototype.handleMove = function(player, state, value) {
@@ -57,14 +60,14 @@ Game.prototype.handleMove = function(player, state, value) {
   var nextpos = player.x+','+player.y;
 
   var collision = this.game[nextpos];
-  if (!collision){
+  if (!collision || collision === player.id){
       delete this.game[prevpos]; 
-      this.game[nextpos] = {object:player, type:'player', id: player.id}; 
+      this.game[nextpos] = player.id; 
   } else {
-      if (collision.type == 'player'){
-        collision.object.alive = false;
-      } 
+      state.players[collision].alive = false;
       player.alive = false;
+      console.log('#'+this.turns + ': ' + player.username + " ran into " + state.players[collision].username);
+      delete this.game[prevpos];
   }
 }
 
@@ -75,9 +78,7 @@ Game.prototype.handleShoot = function(player, state, value) {
 }
 
 Game.prototype.simulate = function(responses, old) {
-    console.dir(responses);
-    console.log('xxx');
-    console.dir(old);
+    this.turns += 1;
     // clone
     var state = JSON.parse(JSON.stringify(old));
     
@@ -94,7 +95,7 @@ Game.prototype.simulate = function(responses, old) {
                }
            }
     }
-    // loop over bullets
+    // loop over bullets kill old players
     for (var cid in state.players) {
         var player = state.players[cid];
         player.bullets.forEach(function(bullet) {
@@ -113,71 +114,32 @@ Game.prototype.simulate = function(responses, old) {
                }
 
                var collision = this.game[bullet.x+','+bullet.y];
-               if (collision) {
-                   if (collision.type == 'player'){
-                     if (collision.object.alive) {
+               if (collision && collision !== player.id) {
+                     if (state.players[collision].alive) {
                          player.kills += 1;
+                         console.log('#'+this.turns + ': ' + player.username + " killed " + state.players[collision].username);
                      }
-                     collision.object.alive = false;
-                   }
+                     state.players[collision].alive = false;
+                     delete this.game[bullet.x+','+bullet.y];
                }
            }
         }, this);
         player.bullets = player.bullets.filter(function(bullet){
             return !(bullet.x > 99 || bullet.x < 0 || bullet.y > 99 || bullet.y <0);
         });
+        if (this.turns - player.dob >= 1000) {
+            player.alive = false;
+            console.log('#'+this.turns + ': ' + player.username + " died of old age"); 
+        }
     }
     return state;
 }
 
-Game.prototype.onEnd = function() {
-    this.gameOver = true;
-    console.log('GAME OVER');
-}
-
 Game.prototype.onTurn = function() {
-    this.turns += 1;
-    console.log('turn: ' + this.turns);
     this.state = this.simulate(this.responses, this.state);
 }
 
-Game.prototype.onStart = function() {
-    console.log('begin game');
-    this.gameStarted = true;
-    this.turns = 0;
-    this.state = this.buildState();
-}
-
-Game.prototype.numResponses = function() {
-    var size = 0;
-    for(var response in this.responses) {
-        if (this.responses.hasOwnProperty(response)){
-            size += 1;
-        }
-    }
-    return size;
-}
-
-Game.prototype.allReceived = function(numPlayers) {
-    return !this.gameOver && numPlayers && this.numResponses() == numPlayers;
-}
-
-Game.prototype.tick = function(numPlayers) {
-    if (!this.allReceived(numPlayers)) {
-        return;
-    }
-
-    if (!this.gameStarted) {
-        this.onStart();
-        this.responses = {}
-        return {command:'state', value: this.state};
-    }
-
-    if (this.turns == 100){
-        this.onEnd();
-        return {command:'gameover'};
-    }
-        
+Game.prototype.tick = function() {
     this.onTurn();
     this.responses = {}
     return {command:'state', value: this.state};
