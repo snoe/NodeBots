@@ -43,6 +43,6 @@ server.listen(8000, function() {
         server.broadcast(JSON.stringify(
             game.tick()
         ));
-    }, 100);
+    }, 50);
 });
 

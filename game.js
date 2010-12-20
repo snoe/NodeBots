@@ -127,7 +127,7 @@ Game.prototype.simulate = function(responses, old) {
         player.bullets = player.bullets.filter(function(bullet){
             return !(bullet.x > 99 || bullet.x < 0 || bullet.y > 99 || bullet.y <0);
         });
-        if (this.turns - player.dob >= 1000) {
+        if (player.alive && (this.turns - player.dob >= 1000)) {
             player.alive = false;
             console.log('#'+this.turns + ': ' + player.username + " died of old age"); 
         }
