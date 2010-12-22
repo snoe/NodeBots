@@ -102,7 +102,7 @@ client = function(scr) {
 
         loginServer = document.createElement('input');
         loginServer.setAttribute("id", "loginServer");
-        loginServer.setAttribute("value", "curvedev:8000");
+        loginServer.setAttribute("value", "localhost:8000");
         loginServer.setAttribute("type", "text");
         loginServer.setAttribute("class", "loginInput");
         LoginDialog.appendChild(loginServer);
@@ -268,10 +268,38 @@ client = function(scr) {
                 drawBullet(player, player.bullets[j]);
             }
         };
-        destroyDialog("StatsDialog");
-        showDialog("StatsDialog");
+        updateStats(state);
+    };
+
+    var updateStat = function(pl) {
+        var div = document.getElementById(pl.id);
+        if (!div) {
+            div = document.createElement('div');
+
+            div.setAttribute('id', pl.id);
+            document.getElementById('statHolder').appendChild(div);
+        }
+        div.setAttribute('class', 'stat ' + (pl.alive ? "ALIVE" : "DEAD"));
+        div.innerHTML = "Player: " + pl.username +
+                        "<br>Kills: " + pl.kills + 
+                        "<br>Shots: " + pl.shots +
+                        "<br>" + (pl.alive ? "ALIVE" : "DEAD");
 
     };
+
+    var updateStats = function(state) {
+        var mypl = state.players[curPlayerId];
+        updateStat(mypl);
+        for (var pid in state.players) {
+            if (pid === curPlayerId) {
+                continue;
+            }
+            var pl = state.players[pid];
+            updateStat(pl);
+        }
+
+    };
+
     var getServerName = function() {
         return loginServer.value;
     };

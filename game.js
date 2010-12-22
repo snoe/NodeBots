@@ -31,7 +31,7 @@ Game.prototype.removePlayer = function(conn) {
 Game.prototype.handleMove = function(player, state, value) {
   var originalX = player.x;
   var originalY = player.y;
-  if (value == 'west') {
+  if (value == 'east') {
       player.x += 1;
       if (player.x > 99){
           player.x = 99;
@@ -43,7 +43,7 @@ Game.prototype.handleMove = function(player, state, value) {
           player.y = 99;
       }
   }
-  if (value == 'east') {
+  if (value == 'west') {
       player.x -= 1;
       if (player.x < 0){
           player.x = 0;
@@ -102,16 +102,16 @@ Game.prototype.simulate = function(responses, old) {
         player.bullets.forEach(function(bullet) {
            for (var x = 0; x < 3; x++) {
                if (bullet.dir == 'west') {
-                    bullet.x = bullet.x += 1;
+                    bullet.x -= 1;
                }
                if (bullet.dir == 'south') {
-                    bullet.y = bullet.y += 1;
+                    bullet.y += 1;
                }
                if (bullet.dir == 'east') {
-                    bullet.x = bullet.x -= 1;
+                    bullet.x += 1;
                }
                if (bullet.dir == 'north') {
-                    bullet.y = bullet.y -= 1;
+                    bullet.y -= 1;
                }
 
                var collision = this.game[bullet.x+','+bullet.y];

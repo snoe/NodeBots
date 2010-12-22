@@ -54,6 +54,28 @@
     padding: 0px;
 }
 
+.bots #statHolder {
+    position:absolute;
+    width: 280px;
+    right:0px;
+    top:0px;
+}
+
+canvas {
+    margin: 10px;
+}
+
+.bots .stat {
+    margin: 10px;
+    border: 1px solid orange;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+.bots .stat.DEAD {
+    background-color:grey;
+}
+
 .bots .dialog.statsDialog {
     width: 280px;
     right:0px !important;

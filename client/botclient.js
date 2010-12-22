@@ -26,6 +26,10 @@ botclient = function() {
         scr.setAttribute("height", container.clientHeight);
         gameClt = client(scr);
         container.appendChild(scr);
+        
+        var statHolder = document.createElement('div');
+        statHolder.setAttribute('id', 'statHolder');
+        container.appendChild(statHolder);
     };
 
     var ready = function() {
