@@ -45,8 +45,10 @@ botclient = function() {
                 break;
             case "state":
                 gameClt.update(data.value);
-                var action = onState(data.value);
-                ws.send(JSON.stringify({command: 'action', value: action}));
+                if (data.value.players[curPlayerId].alive) {
+                    var action = onState(data.value);
+                    ws.send(JSON.stringify({command: 'action', value: action}));
+                }
                 break;
             }
         };
@@ -64,9 +66,14 @@ botclient = function() {
         return arr[0];
     };
 
+    var getPlayerId = function() {
+        return curPlayerId;
+    };
+
     init();
 
     return {
+        getPlayerId: getPlayerId,
         renderTo: renderTo,
         ready: ready,
         onState: setOnState,
