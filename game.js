@@ -73,9 +73,11 @@ Game.prototype.handleMove = function(player, state, value) {
 }
 
 Game.prototype.handleShoot = function(player, state, value) {
-   player.shots += 1;
-   var bullet = {dir: value, x: player.x, y:player.y};
-   player.bullets.push(bullet);
+   if (value) {
+       player.shots += 1;
+       var bullet = {dir: value, x: player.x, y:player.y};
+       player.bullets.push(bullet);
+   }
 }
 
 Game.prototype.simulate = function(responses, old) {
