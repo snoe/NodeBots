@@ -90,11 +90,13 @@ Game.prototype.simulate = function(responses, old) {
            var resp = responses[cid];
            var player = state.players[cid];
            if (player.alive){
-               if (resp.action == 'move') {
-                   this.handleMove(player, state, resp.value);
-               }
-               if (resp.action == 'shoot') {
-                   this.handleShoot(player, state, resp.value);
+               if (resp && resp.action) {
+                   if (resp.action == 'move') {
+                       this.handleMove(player, state, resp.value);
+                   }
+                   if (resp.action == 'shoot') {
+                       this.handleShoot(player, state, resp.value);
+                   }
                }
            }
     }
