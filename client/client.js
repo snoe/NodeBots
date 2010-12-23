@@ -255,7 +255,7 @@ client = function(scr) {
             if (pl.id === curPlayerId) {
                 continue;
             }
-            updateStat(pl, j);
+            updateStat(pl, j+1);
         }
 
     };
