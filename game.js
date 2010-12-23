@@ -25,6 +25,10 @@ Game.prototype.addPlayer = function(conn) {
 }
 
 Game.prototype.removePlayer = function(conn) {
+    var pl = this.state.players[conn.id]
+    if (this.game[pl.x+','+pl.y]) {
+        delete this.game[pl.x+','+pl.y];
+    }
     this.state.players[conn.id].alive = false;
 }
 
