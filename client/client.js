@@ -146,8 +146,23 @@ client = function(scr) {
         };
 
         var renderDivider = false;
+	var players = [];
         for (var i in gameStats.players) {
             var aPlayer = gameStats.players[i];
+	    players.push(aPlayer);
+	}
+	
+	players.sort(function(a,b) {
+	    if (a.dob > b.dob) {
+		return 1;
+	    } else if (b.dob > a.dob) {
+		return -1;
+	    }
+	    return 0;
+	});	
+
+	for (var j=0; j<players.length; j++){
+	    var aPlayer = players[j];
             if (renderDivider) {
                 var divider = document.createElement("div");
                 divider.setAttribute("class", "statsRowDivider");
@@ -283,6 +298,7 @@ client = function(scr) {
         div.innerHTML = "Player: " + pl.username +
                         "<br>Kills: " + pl.kills + 
                         "<br>Shots: " + pl.shots +
+                        "<br>DOB: " + pl.dob +
                         "<br>" + (pl.alive ? "ALIVE" : "DEAD");
 
     };
@@ -290,11 +306,27 @@ client = function(scr) {
     var updateStats = function(state) {
         var mypl = state.players[curPlayerId];
         updateStat(mypl);
+
+	var players = [];
         for (var pid in state.players) {
-            if (pid === curPlayerId) {
+            var pl = state.players[pid];
+	    players.push(pl);
+	}
+	
+	players.sort(function(a,b) {
+	    if (a.dob > b.dob) {
+		return -1;
+	    } else if (b.dob > a.dob) {
+		return 1;
+	    }
+	    return 0;
+	});	
+
+	for (var j=0; j<players.length; j++){
+	    var pl = players[j];
+            if (pl.id === curPlayerId) {
                 continue;
             }
-            var pl = state.players[pid];
             updateStat(pl);
         }
 
