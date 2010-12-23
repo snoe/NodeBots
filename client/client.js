@@ -12,9 +12,7 @@ client = function(scr) {
 
     var LoginDialog = null;
     var loginInput = null;
-    var StatsDialog = null;
 
-    var gameStats = null;
     var curPlayerId = null;
 
     var init = function() {
@@ -127,72 +125,6 @@ client = function(scr) {
         LoginDialog.appendChild(loginBtn);
     };
 
-    var createStatsDialog = function() {
-        // Create game stats dialog
-        StatsDialog = createDialog({
-            cssClass: "statsDialog",
-            id: "StatsDialog"
-        });
-
-        var createStatsRow = function(data, isSelf) {
-            var newRow = document.createElement("div");
-            var class = 'statsRow';
-            if (isSelf) {
-                var class = class + ' isSelf';
-            }
-            newRow.setAttribute("class", class);
-            newRow.innerHTML = '<div class="statName">'+data.name+'</div><div class="statValue">'+data.value+'</div>';
-            return newRow;
-        };
-
-        var renderDivider = false;
-	var players = [];
-        for (var i in gameStats.players) {
-            var aPlayer = gameStats.players[i];
-	    players.push(aPlayer);
-	}
-	
-	players.sort(function(a,b) {
-	    if (a.dob > b.dob) {
-		return 1;
-	    } else if (b.dob > a.dob) {
-		return -1;
-	    }
-	    return 0;
-	});	
-
-	for (var j=0; j<players.length; j++){
-	    var aPlayer = players[j];
-            if (renderDivider) {
-                var divider = document.createElement("div");
-                divider.setAttribute("class", "statsRowDivider");
-                StatsDialog.appendChild(divider);
-            }
-            var isSelf = aPlayer.id === curPlayerId;
-            StatsDialog.appendChild(createStatsRow({
-                name: "PLAYER:",
-                value: gameStats.players[i].username
-            }, isSelf));
-            StatsDialog.appendChild(createStatsRow({
-                name: "STATUS:",
-                value: aPlayer.alive ? "ALIVE" : "DEAD"
-            }, isSelf));
-            StatsDialog.appendChild(createStatsRow({
-                name: "KILLS:",
-                value: aPlayer.kills
-            }, isSelf));
-            StatsDialog.appendChild(createStatsRow({
-                name: "SHOTS:",
-                value: aPlayer.shots
-            }, isSelf));
-            StatsDialog.appendChild(createStatsRow({
-                name: "ACCURACY:",
-                value: (aPlayer.kills ? Math.floor((100/(aPlayer.shots/aPlayer.kills))) : 0) + '%'
-            }, isSelf));
-            renderDivider = true;
-        }
-    };
-
     var setupPlayer = function(player) {
         if (!playerImages[player.id]) {
             playerImages[player.id] = Math.floor(Math.random()*playerImages.length);
@@ -253,9 +185,6 @@ client = function(scr) {
     };
 
     var update = function(state) {
-        if (state) {
-            gameStats = state;
-        }
         setupScreen(state);
     };
 
@@ -286,7 +215,7 @@ client = function(scr) {
         updateStats(state);
     };
 
-    var updateStat = function(pl) {
+    var updateStat = function(pl, order) {
         var div = document.getElementById(pl.id);
         if (!div) {
             div = document.createElement('div');
@@ -295,6 +224,7 @@ client = function(scr) {
             document.getElementById('statHolder').appendChild(div);
         }
         div.setAttribute('class', 'stat ' + (pl.alive ? "ALIVE" : "DEAD"));
+        div.setAttribute('style', '-webkit-box-ordinal-group: ' +order +';');
         div.innerHTML = "Player: " + pl.username +
                         "<br>Kills: " + pl.kills + 
                         "<br>Shots: " + pl.shots +
@@ -305,29 +235,27 @@ client = function(scr) {
 
     var updateStats = function(state) {
         var mypl = state.players[curPlayerId];
-        updateStat(mypl);
+        updateStat(mypl, 1);
 
-	var players = [];
+        var players = [];
         for (var pid in state.players) {
             var pl = state.players[pid];
-	    players.push(pl);
-	}
-	
-	players.sort(function(a,b) {
-	    if (a.dob > b.dob) {
-		return -1;
-	    } else if (b.dob > a.dob) {
-		return 1;
-	    }
-	    return 0;
-	});	
-
-	for (var j=0; j<players.length; j++){
-	    var pl = players[j];
+            players.push(pl);
+        }
+        players.sort(function(a,b) {
+            if (a.dob > b.dob) {
+            return -1;
+            } else if (b.dob > a.dob) {
+            return 1;
+            }
+            return 0;
+        });	
+        for (var j=0; j<players.length; j++){
+            var pl = players[j];
             if (pl.id === curPlayerId) {
                 continue;
             }
-            updateStat(pl);
+            updateStat(pl, j);
         }
 
     };

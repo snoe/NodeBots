@@ -59,6 +59,8 @@
     width: 280px;
     right:0px;
     top:0px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
 }
 
 canvas {
